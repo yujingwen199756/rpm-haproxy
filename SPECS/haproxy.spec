@@ -1,21 +1,39 @@
 %define haproxy_user    haproxy
-%define haproxy_group   %{haproxy_user}
+%define haproxy_uid     188
+%define haproxy_group   haproxy
+%define haproxy_gid     188
 %define haproxy_home    %{_localstatedir}/lib/haproxy
 %define haproxy_confdir %{_sysconfdir}/haproxy
 %define haproxy_datadir %{_datadir}/haproxy
 
-Summary: HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
+%define version 1.6.3
+
 Name: haproxy
-Version: 1.6.3
+Summary: HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
+Version: %{version}
 Release: 1
 License: GPL
+URL: http://www.haproxy.org/
 Group: System Environment/Daemons
-URL: http://haproxy.1wt.eu/
+
 Source0: http://www.haproxy.org/download/1.6/src/%{name}-%{version}.tar.gz
 Source1: %{name}.init
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
-BuildRequires: pcre-devel
-Requires: /sbin/chkconfig, /sbin/service
+Source2: %{name}.cfg
+Source3: %{name}.logrotate
+
+BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
+
+BuildRequires: pcre-devel openssl-devel zlib-devel
+BuildRequires: setup >= 2.5
+
+Requires(pre): %{_sbindir}/groupadd
+Requires(pre): %{_sbindir}/useradd
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
+Requires(preun): /sbin/service
+Requires(postun): /sbin/service
+
+Requires: pcre openssl zlib
 
 %description
 HA-Proxy is a TCP/HTTP reverse proxy which is particularly suited for high
@@ -34,7 +52,7 @@ handle thousands of simultaneous connections on hundreds of instances without
 risking the system's stability.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}
 
 # We don't want any perl dependecies in this RPM:
 %define __perl_requires /bin/true
@@ -45,26 +63,31 @@ risking the system's stability.
 %install
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
 
-%{__install} -d %{buildroot}%{_sbindir}
-%{__install} -d %{buildroot}%{_sysconfdir}/rc.d/init.d
-%{__install} -d %{buildroot}%{_sysconfdir}/%{name}
-%{__install} -d %{buildroot}%{_mandir}/man1/
+make install-bin DESTDIR=%{buildroot} PREFIX=%{_prefix}
+make install-man DESTDIR=%{buildroot} PREFIX=%{_prefix}
 
-%{__install} -s %{name} %{buildroot}%{_sbindir}/
-#%{__install} -c -m 644 examples/%{name}.cfg %{buildroot}%{_sysconfdir}/%{name}/
-%{__install} -c -m 755 %{SOURCE1} %{buildroot}%{_sysconfdir}/rc.d/init.d/%{name}
-%{__install} -c -m 755 doc/%{name}.1 %{buildroot}%{_mandir}/man1/
+%{__install} -p -D -m 0755 %{SOURCE1} %{buildroot}%{_initrddir}/%{name}
+%{__install} -p -D -m 0644 %{SOURCE2} %{buildroot}%{haproxy_confdir}/%{name}.cfg
+#%{__install} -p -D -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/logrotate.d/%{name}
+%{__install} -d -m 0755 %{buildroot}%{haproxy_home}
+%{__install} -d -m 0755 %{buildroot}%{haproxy_datadir}
+%{__install} -d -m 0755 %{buildroot}%{_bindir}
+%{__install} -p -m 0644 ./examples/errorfiles/* %{buildroot}%{haproxy_datadir}
+
+for file in $(find . -type f -name '*.txt') ; do
+    iconv -f ISO-8859-1 -t UTF-8 -o $file.new $file && \
+    touch -r $file $file.new && \
+    mv $file.new $file
+done
+
+find ./examples/* -type f ! -name "*.cfg" -exec %{__rm} -f "{}" \;
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
 
 %pre
-getent group %{haproxy_group} >/dev/null || \
-       groupadd -g 188 -r %{haproxy_group}
-getent passwd %{haproxy_user} >/dev/null || \
-       useradd -u 188 -r -g %{haproxy_group} -d %{haproxy_home} \
-       -s /sbin/nologin -c "haproxy" %{haproxy_user}
-exit 0
+%{_sbindir}/groupadd -g %{haproxy_gid} -r %{haproxy_group} 2>/dev/null || :
+%{_sbindir}/useradd -u %{haproxy_uid} -g %{haproxy_group} -d %{haproxy_home} -s /sbin/nologin -r %{haproxy_user} 2>/dev/null || :
 
 %post
 /sbin/chkconfig --add %{name}
@@ -81,14 +104,24 @@ if [ "$1" -ge "1" ]; then
 fi
 
 %files
-%defattr(-,root,root)
-%doc CHANGELOG README examples/*.cfg doc/architecture.txt doc/configuration.txt doc/intro.txt doc/management.txt doc/proxy-protocol.txt
-%doc %{_mandir}/man1/%{name}.1*
-
-%attr(0755,root,root) %{_sbindir}/%{name}
-%dir %{_sysconfdir}/%{name}
-#%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/%{name}/%{name}.cfg
-%attr(0755,root,root) %config %{_sysconfdir}/rc.d/init.d/%{name}
+%defattr(-,root,root,-)
+%doc CHANGELOG LICENSE README doc/*
+%doc examples/url-switching.cfg
+%doc examples/acl-content-sw.cfg
+%doc examples/content-sw-sample.cfg
+%doc examples/cttproxy-src.cfg
+%doc examples/haproxy.cfg
+%doc examples/tarpit.cfg
+%{haproxy_datadir}
+%dir %{haproxy_confdir}
+%config(noreplace) %{haproxy_confdir}/%{name}.cfg
+#%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
+%{_initrddir}/%{name}
+%{_sbindir}/%{name}
+%{_bindir}/halog
+%{_mandir}/man1/%{name}.1.gz
+%attr(-,%{haproxy_user},%{haproxy_group}) %dir %{haproxy_home}
+%exclude %{_sbindir}/haproxy-systemd-wrapper
 
 %changelog
 * Sun Dec 27 2015 Willy Tarreau <w@1wt.eu>
