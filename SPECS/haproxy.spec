@@ -1,11 +1,11 @@
 Summary: HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
 Name: haproxy
-Version: 1.6.0
+Version: 1.6.3
 Release: 1
 License: GPL
 Group: System Environment/Daemons
 URL: http://haproxy.1wt.eu/
-Source0: http://haproxy.1wt.eu/download/1.5/src/devel/%{name}-%{version}.tar.gz
+Source0: http://www.haproxy.org/download/1.6/src/%{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: pcre-devel
 Requires: /sbin/chkconfig, /sbin/service
@@ -37,7 +37,7 @@ risking the system's stability.
 
 %install
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
- 
+
 %{__install} -d %{buildroot}%{_sbindir}
 %{__install} -d %{buildroot}%{_sysconfdir}/rc.d/init.d
 %{__install} -d %{buildroot}%{_sysconfdir}/%{name}
@@ -47,11 +47,11 @@ risking the system's stability.
 #%{__install} -c -m 644 examples/%{name}.cfg %{buildroot}%{_sysconfdir}/%{name}/
 %{__install} -c -m 755 examples/%{name}.init %{buildroot}%{_sysconfdir}/rc.d/init.d/%{name}
 %{__install} -c -m 755 doc/%{name}.1 %{buildroot}%{_mandir}/man1/
- 
+
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
- 
 %post
+
 /sbin/chkconfig --add %{name}
 
 %preun
@@ -76,6 +76,9 @@ fi
 %attr(0755,root,root) %config %{_sysconfdir}/rc.d/init.d/%{name}
 
 %changelog
+* Mon Feb 15 2016
+- updated to 1.6.3
+
 * Tue Oct 13 2015 Willy Tarreau <w@1wt.eu>
 - updated to 1.6.0
 
