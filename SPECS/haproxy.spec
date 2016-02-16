@@ -1,3 +1,9 @@
+%define haproxy_user    haproxy
+%define haproxy_group   %{haproxy_user}
+%define haproxy_home    %{_localstatedir}/lib/haproxy
+%define haproxy_confdir %{_sysconfdir}/haproxy
+%define haproxy_datadir %{_datadir}/haproxy
+
 Summary: HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
 Name: haproxy
 Version: 1.6.3
@@ -51,6 +57,14 @@ risking the system's stability.
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
+
+%pre
+getent group %{haproxy_group} >/dev/null || \
+       groupadd -g 188 -r %{haproxy_group}
+getent passwd %{haproxy_user} >/dev/null || \
+       useradd -u 188 -r -g %{haproxy_group} -d %{haproxy_home} \
+       -s /sbin/nologin -c "haproxy" %{haproxy_user}
+exit 0
 
 %post
 /sbin/chkconfig --add %{name}
