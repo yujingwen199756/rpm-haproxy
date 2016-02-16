@@ -76,7 +76,7 @@ fi
 %attr(0755,root,root) %config %{_sysconfdir}/rc.d/init.d/%{name}
 
 %changelog
-* Mon Feb 15 2016
+* Mon Feb 15 2016 NLB <nlb@bit.c>
 - updated to 1.6.3
 
 * Tue Oct 13 2015 Willy Tarreau <w@1wt.eu>
