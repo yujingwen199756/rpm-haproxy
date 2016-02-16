@@ -101,8 +101,8 @@ case "$1" in
         fdr_status
         ;;
     condrestart|try-restart)
-  	[ ! -f $lockfile ] || restart
-	;;
+        [ ! -f $lockfile ] || restart
+        ;;
     *)
         echo $"Usage: $0 {start|stop|status|restart|try-restart|reload|force-reload}"
         exit 2

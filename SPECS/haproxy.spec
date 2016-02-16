@@ -6,6 +6,7 @@ License: GPL
 Group: System Environment/Daemons
 URL: http://haproxy.1wt.eu/
 Source0: http://www.haproxy.org/download/1.6/src/%{name}-%{version}.tar.gz
+Source1: %{name}.init
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
 BuildRequires: pcre-devel
 Requires: /sbin/chkconfig, /sbin/service
@@ -45,7 +46,7 @@ risking the system's stability.
 
 %{__install} -s %{name} %{buildroot}%{_sbindir}/
 #%{__install} -c -m 644 examples/%{name}.cfg %{buildroot}%{_sysconfdir}/%{name}/
-%{__install} -c -m 755 examples/%{name}.init %{buildroot}%{_sysconfdir}/rc.d/init.d/%{name}
+%{__install} -c -m 755 %{SOURCE1} %{buildroot}%{_sysconfdir}/rc.d/init.d/%{name}
 %{__install} -c -m 755 doc/%{name}.1 %{buildroot}%{_mandir}/man1/
 
 %clean
