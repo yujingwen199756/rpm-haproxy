@@ -50,8 +50,8 @@ risking the system's stability.
 
 %clean
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
-%post
 
+%post
 /sbin/chkconfig --add %{name}
 
 %preun
@@ -76,8 +76,14 @@ fi
 %attr(0755,root,root) %config %{_sysconfdir}/rc.d/init.d/%{name}
 
 %changelog
-* Mon Feb 15 2016 NLB <nlb@bit.c>
+* Sun Dec 27 2015 Willy Tarreau <w@1wt.eu>
 - updated to 1.6.3
+
+* Tue Nov  3 2015 Willy Tarreau <w@1wt.eu>
+- updated to 1.6.2
+
+* Tue Oct 20 2015 Willy Tarreau <w@1wt.eu>
+- updated to 1.6.1
 
 * Tue Oct 13 2015 Willy Tarreau <w@1wt.eu>
 - updated to 1.6.0
