@@ -6,7 +6,7 @@
 %define haproxy_confdir %{_sysconfdir}/haproxy
 %define haproxy_datadir %{_datadir}/haproxy
 
-%define version 1.7.8
+%define version 1.8.3
 
 Name: haproxy
 Summary: HA-Proxy is a TCP/HTTP reverse proxy for high availability environments
@@ -16,7 +16,7 @@ License: GPL
 URL: http://www.haproxy.org/
 Group: System Environment/Daemons
 
-Source0: http://www.haproxy.org/download/1.7/src/%{name}-%{version}.tar.gz
+Source0: http://www.haproxy.org/download/1.8/src/%{name}-%{version}.tar.gz
 Source1: %{name}.init
 Source2: %{name}.cfg
 Source3: %{name}.logrotate
