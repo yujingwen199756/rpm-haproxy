@@ -58,7 +58,7 @@ risking the system's stability.
 %define __perl_requires /bin/true
 
 %build
-%{__make} USE_OPENSSL=yes USE_PCRE=1 USE_LUA=yes LUA_LIB=/usr/local/lib/ LUA_INC=/usr/local/include/ USE_ZLIB=1 DEBUG="" ARCH=%{_target_cpu} TARGET=linux26
+%{__make} USE_OPENSSL=yes USE_PCRE=1 USE_SYSTEMD=1 USE_LUA=yes LUA_LIB=/usr/local/lib/ LUA_INC=/usr/local/include/ USE_ZLIB=1 DEBUG="" ARCH=%{_target_cpu} TARGET=linux26
 
 %install
 [ "%{buildroot}" != "/" ] && %{__rm} -rf %{buildroot}
